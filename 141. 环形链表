@@ -36,7 +36,7 @@ public class Solution {
 修改后
 public class Solution {
     public boolean hasCycle(ListNode head) {
-        Set<Integer> s = new HashSet<Integer>();
+        Set<ListNode> s = new HashSet<ListNode>();
         while(head!=null)
         {
             if(!s.contains(head))
