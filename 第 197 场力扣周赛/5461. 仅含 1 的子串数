@@ -1,0 +1,148 @@
+给你一个二进制字符串 s（仅由 '0' 和 '1' 组成的字符串）。
+
+返回所有字符都为 1 的子字符串的数目。
+
+由于答案可能很大，请你将它对 10^9 + 7 取模后返回。
+
+ 
+
+示例 1：
+
+输入：s = "0110111"
+输出：9
+解释：共有 9 个子字符串仅由 '1' 组成
+"1" -> 5 次
+"11" -> 3 次
+"111" -> 1 次
+示例 2：
+
+输入：s = "101"
+输出：2
+解释：子字符串 "1" 在 s 中共出现 2 次
+示例 3：
+
+输入：s = "111111"
+输出：21
+解释：每个子字符串都仅由 '1' 组成
+示例 4：
+
+输入：s = "000"
+输出：0
+ 
+
+提示：
+
+s[i] == '0' 或 s[i] == '1'
+1 <= s.length <= 10^5
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/number-of-substrings-with-only-1s
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+
+
+我的方法：
+/**
+*第1次，“1”，是1
+*第二次，“11”，是3
+*第三次，“111”，是6
+*第i次=第i-1次 + i
+*/
+class Solution {
+    public int num(int length)
+    {
+        if(length==0){
+            return 0;
+        }
+        if(length==1)
+            return 1;
+        else
+            return (num(length-1)+length)%1000000007;
+    }
+    public int numSub(String s) {
+        int n1 = 1;
+        int length=0;
+        int sum=0;
+        for(int i=0;i<s.length();i++)
+        {
+            if(s.charAt(i)=='0')
+            {
+                sum+=(num(length));
+                length=0;
+                
+                continue;
+            }
+                
+            if(s.charAt(i)=='1')
+            {
+                length++;
+            }
+        }
+        if(length>0)
+        {
+            sum+=(num(length));
+        }
+       return sum;
+    }
+}
+
+
+大佬的方法：
+法一
+ /**
+            *连续字符串为“1”时，排列组合是“1”，是1
+            *“11”，排列组合：“1”，“1”，“11”，是3
+            *((1+n)*n)/2
+            */
+class Solution {
+    public int numSub(String s) {
+        String[] strs = s.split("0");
+        int size = 0;
+        int mode = (int)(Math.pow(10,9) + 7);
+        for(String str: strs){
+            double a = (double) str.length();
+            double b = (double) str.length() + 1;
+            size = size + (int)((a*b)/2 % mode);
+        }
+        return size;
+    }
+}
+作者：tengfeiplus
+链接：https://leetcode-cn.com/problems/number-of-substrings-with-only-1s/solution/java-nei-cun-huan-you-dian-gao-by-tengfeiplus/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+
+
+法二和法一一样，作者说是双百
+class Solution {
+    public int numSub(String s) {
+        double count = 0;
+        double modNumber = Math.pow(10.0, 9.0) + 7;
+        List<Integer> list = new LinkedList<>();
+        for(int i = 0; i < s.length(); i++){
+            int start = i;
+            while (i < s.length() && s.charAt(i) == '1'){
+                i++;
+                count++;
+            }
+
+            if(i - start > 1){
+                list.add(i - start);
+            }
+        }
+        for(int i : list){
+            //这里相乘太大了，需要转换下
+            double tmp = (double)(i - 1) * i / 2;
+            count += tmp;
+
+        }
+        count %= modNumber;
+        return (int)count;
+    }
+}
+
+作者：kingsleyy
+链接：https://leetcode-cn.com/problems/number-of-substrings-with-only-1s/solution/java-shuang-bai-by-kingsleyy/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
