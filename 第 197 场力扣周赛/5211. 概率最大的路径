@@ -1,0 +1,210 @@
+给你一个由 n 个节点（下标从 0 开始）组成的无向加权图，该图由一个描述边的列表组成，其中 edges[i] = [a, b] 表示连接节点 a 和 b 的一条无向边，且该边遍历成功的概率为 succProb[i] 。
+
+指定两个节点分别作为起点 start 和终点 end ，请你找出从起点到终点成功概率最大的路径，并返回其成功概率。
+
+如果不存在从 start 到 end 的路径，请 返回 0 。只要答案与标准答案的误差不超过 1e-5 ，就会被视作正确答案。
+
+ 
+
+示例 1：
+
+
+
+输入：n = 3, edges = [[0,1],[1,2],[0,2]], succProb = [0.5,0.5,0.2], start = 0, end = 2
+输出：0.25000
+解释：从起点到终点有两条路径，其中一条的成功概率为 0.2 ，而另一条为 0.5 * 0.5 = 0.25
+示例 2：
+
+
+
+输入：n = 3, edges = [[0,1],[1,2],[0,2]], succProb = [0.5,0.5,0.3], start = 0, end = 2
+输出：0.30000
+示例 3：
+
+
+
+输入：n = 3, edges = [[0,1]], succProb = [0.5], start = 0, end = 2
+输出：0.00000
+解释：节点 0 和 节点 2 之间不存在路径
+ 
+
+提示：
+
+2 <= n <= 10^4
+0 <= start, end < n
+start != end
+0 <= a, b < n
+a != b
+0 <= succProb.length == edges.length <= 2*10^4
+0 <= succProb[i] <= 1
+每两个节点之间最多有一条边
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/path-with-maximum-probability
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+
+我的答案：只满足部分测试用例
+
+
+大佬的答案：
+
+建立图
+采用邻接表的形式
+
+BFS搜索
+visit数组
+做过图的BFS都知道需要创建一个visit数组，我是这么想的，对于一个节点的访问状态确定由两方面决定
+
+是否访问过
+上一次的可能性
+我认为如果当前到达一个节点，且该节点被访问过了且上次经过该节点的概率高于本次进入节点的概率，那么这次访问就没有必要进行下去了
+因此 visit[i] < rate 才会继续进行访问
+每次遍历记录的信息
+当前是哪个节点
+当前rate
+
+作者：spring-without-ns
+链接：https://leetcode-cn.com/problems/path-with-maximum-probability/solution/java-bfsfei-di-gui-yi-yu-li-jie-by-spring-without-/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+import java.util.*;
+
+class Solution {
+   
+    GraphNode[] graph = null;
+    double maxRate = 0;
+    double visits[] = null;
+
+    public double maxProbability(int n, int[][] edges, double[] succProb, int start, int end) {
+        graph = new GraphNode[n];
+        //init
+        for (int i = 0; i < graph.length; i++) {
+            graph[i] = new GraphNode();
+        }
+        for (int i = 0; i < edges.length; i++) {
+            int[] edge = edges[i];
+            graph[edge[0]].edge.add(new Edge(succProb[i], edge[1]));
+            graph[edge[1]].edge.add(new Edge(succProb[i], edge[0]));
+        }
+        visits = new double[n];
+        for (int i = 0; i < n; i++) {
+            visits[i] = 0;
+        }
+        bfs(start, end);
+        return maxRate;
+    }
+
+
+    public void bfs(int start, int e) {
+        Queue<State> queue = new LinkedList<>();
+        queue.add(new State(1, start));
+        while (queue.isEmpty() == false) {
+            int s = queue.peek().pos;
+            double rate = queue.peek().rate;
+            queue.poll();
+            if (s == e) {
+                maxRate = Math.max(rate, maxRate);
+            } else if (visits[s] < rate) {
+                visits[s] = rate;
+                GraphNode graphNode = graph[s];
+                List<Edge> edges = graphNode.edge;
+                for (Edge edge : edges) {
+                    queue.add(new State(rate * edge.weight, edge.to));
+                }
+            }
+        }
+
+    }
+}
+
+class State {
+    double rate;
+    int pos;
+
+    public State(double rate, int pos) {
+        this.rate = rate;
+        this.pos = pos;
+    }
+}
+
+class GraphNode {
+    List<Edge> edge = new LinkedList<>();
+}
+
+class Edge {
+    double weight;
+    int to;
+
+    public Edge(double w, int to) {
+        weight = w;
+        this.to = to;
+    }
+}
+
+作者：spring-without-ns
+链接：https://leetcode-cn.com/problems/path-with-maximum-probability/solution/java-bfsfei-di-gui-yi-yu-li-jie-by-spring-without-/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+
+方法二：
+把结构放进list，BFS
+class Solution {
+   
+   public double maxProbability(int n, int[][] edges, double[] succProb, int start, int end) {
+         
+        double error = 1e-6;
+        Map<Integer, List<Node>> map = new HashMap<>();
+        //把当前得结构放进去
+        for (int i = 0; i < edges.length; i++) {
+            int[] e = edges[i];
+            if (!map.containsKey(e[0])) {
+                map.put(e[0], new ArrayList<>());
+            }
+            
+            if (!map.containsKey(e[1])) {
+                map.put(e[1], new ArrayList<>());
+            }
+            //这里是无向图，要正反放入
+            map.get(e[0]).add(new Node(e[0], e[1], succProb[i]));
+            map.get(e[1]).add(new Node(e[1], e[0], succProb[i]));
+        }
+        double[] dp = new double[n];
+        dp[start] = 1;
+        //BFS搜索
+        Queue<Integer> q = new ArrayDeque<>();
+        q.add(start);
+        while (!q.isEmpty()) {
+            int cur = q.poll();
+            //找到以当前结点连接得点
+            for (Node node : map.getOrDefault(cur, new ArrayList<>())) {
+                //循环，看看能不能让成功率更高，如果成功率更高，就可以选用，
+                //把点放入node
+                if (dp[cur] * node.prob > dp[node.to] + error) {
+                    q.add(node.to);
+                    //保存当前点得成功率
+                    dp[node.to] = dp[cur] * node.prob;
+                }
+            }
+        }
+        return dp[end];
+    }
+    
+    class Node {
+        int from;
+        int to;
+        double prob; 
+        public Node(int from, int to, double prob) {
+            this.from = from;
+            this.to = to;
+            this.prob = prob;
+        }
+    }
+}
+
+作者：dui-fang-zheng-zai-jiang-hua-2
+链接：https://leetcode-cn.com/problems/path-with-maximum-probability/solution/javaba-jie-gou-fang-jin-listbfs-by-dui-fang-zheng-/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
