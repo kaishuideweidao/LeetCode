@@ -1,0 +1,96 @@
+反转一个单链表。
+
+示例:
+
+输入: 1->2->3->4->5->NULL
+输出: 5->4->3->2->1->NULL
+进阶:
+你可以迭代或递归地反转链表。你能否用两种方法解决这道题？
+
+来源：力扣（LeetCode）
+链接：https://leetcode-cn.com/problems/reverse-linked-list
+著作权归领扣网络所有。商业转载请联系官方授权，非商业转载请注明出处。
+
+我的答案：（C++）
+/***
+*1.开始用头插法超时
+*2.p指向当前结点前一个节点，q指向当前节点，t指向下一个节点
+*/
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+    //先判断head==NULL，否则当head为空时报错
+        if (head == NULL || head->next == NULL) {
+            return head;
+        }
+        ListNode *q,*t,*p=head;
+        q = head->next;
+        int flag=0;
+        while(q)
+        {
+            t = q->next;
+            q->next = p;
+            if(flag==0)
+            {
+                p->next = NULL;
+                flag = 1;
+            }
+            p = q;
+            q = t;   
+        }
+        return p;
+    }
+};
+
+官方答案：
+法一
+/**双指针局部反转
+定义两个指针： pre 和 curcur ；pre 在前 cur 在后。
+每次让 pre->next 指向 cur ，实现一次局部反转
+局部反转完成之后， pre 和 cur 同时往前移动一个位置
+循环上述过程，直至 pre 到达链表尾部
+*/
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        ListNode* cur = NULL, *pre = head;
+        while (pre != NULL) {
+            ListNode* t = pre->next;
+            pre->next = cur;
+            cur = pre;
+            pre = t;
+        }
+        return cur;
+    }
+};
+
+作者：huwt
+链接：https://leetcode-cn.com/problems/reverse-linked-list/solution/fan-zhuan-lian-biao-shuang-zhi-zhen-di-gui-yao-mo-/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
+
+法二
+/*使用递归函数，一直递归到链表的最后一个结点，该结点就是反转后的头结点，记作 retret .
+*此后，每次函数在返回的过程中，让当前结点的下一个结点的 nextnext 指针指向当前节点。
+*同时让当前结点的 nextnext 指针指向 NULLNULL ，从而实现从链表尾部开始的局部反转
+*当递归函数全部出栈后，链表反转完成。
+*/
+
+class Solution {
+public:
+    ListNode* reverseList(ListNode* head) {
+        if (head == NULL || head->next == NULL) {
+            return head;
+        }
+        ListNode* ret = reverseList(head->next);
+        head->next->next = head;
+        head->next = NULL;
+        return ret;
+    }
+};
+
+
+作者：huwt
+链接：https://leetcode-cn.com/problems/reverse-linked-list/solution/fan-zhuan-lian-biao-shuang-zhi-zhen-di-gui-yao-mo-/
+来源：力扣（LeetCode）
+著作权归作者所有。商业转载请联系作者获得授权，非商业转载请注明出处。
